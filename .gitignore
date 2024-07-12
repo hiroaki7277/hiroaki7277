@@ -1,0 +1,22 @@
+# Python
+*.py[cod]
+__pycache__/
+*.so
+
+# Virtualenv
+venv/
+
+# Django
+*.log
+*.pot
+*.pyc
+*.mo
+*.swp
+db.sqlite3
+media
+
+# MacOS
+.DS_Store
+
+# Nginx
+nginx.conf
