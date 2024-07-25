@@ -20,3 +20,5 @@ media
 
 # Nginx
 nginx.conf
+
+.env
