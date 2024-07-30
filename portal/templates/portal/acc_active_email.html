@@ -1,0 +1,11 @@
+{% autoescape off %}
+こんにちは {{ user.username }} さん,
+
+以下のリンクをクリックして、あなたの社内ポータルアカウントを有効化してください：
+
+http://{{ domain }}{% url 'portal:activate' uidb64=uid token=token %}
+
+このリンクは一度だけ有効です。有効化に問題がある場合は、管理者にお問い合わせください。
+
+ご登録ありがとうございます。
+{% endautoescape %}
