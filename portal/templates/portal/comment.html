@@ -1,0 +1,25 @@
+<div class="comment" data-comment-id="{{ comment.id }}">
+    <div class="comment-header">
+        <span class="comment-author">{{ comment.author.username }}</span>
+        <span class="comment-time">{{ comment.created_at|date:"Y/m/d H:i" }}</span>
+    </div>
+    <div class="comment-content">{{ comment.content }}</div>
+    {% if comment.file %}
+        <div class="comment-file">
+            <a href="{{ comment.file.url }}" target="_blank">{{ comment.get_file_name }}</a>
+        </div>
+    {% endif %}
+    <button class="reply-toggle" data-comment-id="{{ comment.id }}">返信する</button>
+    <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+        <form method="post" action="{% url 'portal:add_reply' post.id comment.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <button type="submit">送信</button>
+        </form>
+    </div>
+    <div class="replies">
+        {% for reply in comment.replies.all %}
+            {% include 'portal/comment.html' with comment=reply %}
+        {% endfor %}
+    </div>
+</div>

@@ -22,6 +22,9 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+SESSION_COOKIE_SECURE = False  # 開発環境ではFalse、本番環境ではTrue
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -42,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
+    'portal',
 ]
 
 MIDDLEWARE = [
@@ -59,7 +64,7 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # この行を追加または更新
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,8 +77,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'myproject.wsgi.application'
 
+WSGI_APPLICATION = 'myproject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -126,13 +131,37 @@ USE_TZ = True
 
 # settings.py
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
-# 追加: STATIC_ROOTの設定
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'portal:login'
+LOGIN_REDIRECT_URL = 'portal:home'
+PASSWORD_RESET_TIMEOUT = 3600  # 1 hour
+
+# 開発環境用メール設定
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+LOGOUT_REDIRECT_URL = 'portal:home'
+
+
+ASGI_APPLICATION = 'myproject.asgi.application'
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
+
+CSRF_COOKIE_HTTPONLY = False

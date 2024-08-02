@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}チャット - 社内ポータル{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <h2>チャット</h2>
+    <div class="post-form">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">送信</button>
+        </form>
+    </div>
+    <div id="chat-log">
+        {% for post in posts %}
+            <div class="post-container">
+                <div class="post" data-post-id="{{ post.id }}">
+                    <div class="post-header">
+                        <span class="post-author">{{ post.author.username }}</span>
+                        <span class="post-time">{{ post.created_at|date:"Y/m/d H:i" }}</span>
+                        {% if user == post.author %}
+                            <div class="post-actions">
+                                <button class="edit-post-btn">編集</button>
+                                <button class="delete-post-btn">削除</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="post-content">{{ post.content }}</div>
+                    {% if post.file %}
+                        <div class="post-file">
+                            <a href="{{ post.file.url }}" target="_blank">{{ post.get_file_name }}</a>
+                        </div>
+                    {% endif %}
+                    <button class="comment-toggle" data-post-id="{{ post.id }}">コメントする</button>
+                    <button class="like-btn {% if user in post.like_set.all %}liked{% endif %}" data-type="post" data-id="{{ post.id }}">
+                        いいね <span class="like-count">{{ post.like_set.count }}</span>
+                    </button>
+                    <div class="liked-users" {% if post.like_set.exists %}style="display: block;"{% endif %}>
+                        いいねしたユーザー: {% for like in post.like_set.all %}{{ like.user.username }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </div>
+                </div>
+                <div class="comments-container">
+                    {% for comment in comments %}
+                        {% if comment.post_id == post.id %}
+                        <div class="comment {% if comment.parent %}reply{% endif %}" data-comment-id="{{ comment.id }}">
+                            <div class="comment-header">
+                                <span class="comment-author">{{ comment.author.username }}</span>
+                                <span class="comment-time">{{ comment.created_at|date:"Y/m/d H:i" }}</span>
+                                {% if user == comment.author %}
+                                <div class="comment-actions">
+                                    <button class="edit-comment-btn">編集</button>
+                                    <button class="delete-comment-btn">削除</button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="comment-content">{{ comment.content }}</div>
+                            {% if comment.file %}
+                                <div class="comment-file">
+                                    <a href="{{ comment.file.url }}" target="_blank">{{ comment.get_file_name }}</a>
+                                </div>
+                            {% endif %}
+                            <button class="reply-toggle" data-post-id="{{ post.id }}" data-comment-id="{{ comment.id }}">返信する</button>
+                            <button class="like-btn" data-type="comment" data-id="{{ comment.id }}">
+                                いいね <span class="like-count">{{ comment.like_set.count }}</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="comment-form" id="comment-form-{{ post.id }}" style="display: none;">
+                    <form method="post" action="{% url 'portal:add_comment' post.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ comment_form.as_p }}
+                        <button type="submit">送信</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // CSRFトークンの設定
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    axios.defaults.xsrfCookieName = 'csrftoken';
+    axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+    axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+
+    // イベント委譲を使用してすべてのクリックイベントを処理
+    document.addEventListener('click', function(event) {
+        // コメントトグル
+        if (event.target.classList.contains('comment-toggle')) {
+            const postId = event.target.getAttribute('data-post-id');
+            const commentForm = document.getElementById(`comment-form-${postId}`);
+            toggleForm(commentForm, event.target, 'コメントする');
+        }
+
+        // 返信トグル
+        if (event.target.classList.contains('reply-toggle')) {
+            const postId = event.target.getAttribute('data-post-id');
+            const commentId = event.target.getAttribute('data-comment-id');
+            const commentContent = event.target.closest('.comment').querySelector('.comment-content').textContent;
+            const commentForm = document.getElementById(`comment-form-${postId}`);
+            const textarea = commentForm.querySelector('textarea');
+            textarea.value = `返信: "${commentContent.trim()}"\n\n`;
+            commentForm.action = `{% url 'portal:add_reply' 999999 888888 %}`.replace('999999', postId).replace('888888', commentId);
+            commentForm.style.display = 'block';
+            event.target.textContent = 'キャンセル';
+            commentForm.scrollIntoView({behavior: 'smooth'});
+        }
+
+        // 投稿編集
+        if (event.target.classList.contains('edit-post-btn')) {
+            handleEdit(event.target, 'post');
+        }
+
+        // 投稿削除
+        if (event.target.classList.contains('delete-post-btn')) {
+            handleDelete(event.target, 'post');
+        }
+
+        // コメント編集
+        if (event.target.classList.contains('edit-comment-btn')) {
+            handleEdit(event.target, 'comment');
+        }
+
+        // コメント削除
+        if (event.target.classList.contains('delete-comment-btn')) {
+            handleDelete(event.target, 'comment');
+        }
+
+        // いいね機能
+        if (event.target.classList.contains('like-btn')) {
+            handleLike(event.target);
+        }
+    });
+
+    function toggleForm(form, button, defaultText) {
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+            button.textContent = 'キャンセル';
+        } else {
+            form.style.display = 'none';
+            button.textContent = defaultText;
+        }
+    }
+
+    function handleEdit(button, type) {
+        const element = button.closest(type === 'post' ? '.post' : '.comment');
+        const id = element.dataset[`${type}Id`];
+        const contentElement = element.querySelector(`.${type}-content`);
+        const currentContent = contentElement.textContent;
+
+        const textarea = document.createElement('textarea');
+        textarea.value = currentContent;
+        contentElement.replaceWith(textarea);
+
+        const saveButton = document.createElement('button');
+        saveButton.textContent = '保存';
+        saveButton.addEventListener('click', function() {
+            const newContent = textarea.value;
+
+            axios.post(`/${type}/${id}/edit/`, {
+                content: newContent
+            })
+            .then(response => {
+                if (response.data.success) {
+                    const newContentElement = document.createElement('div');
+                    newContentElement.className = `${type}-content`;
+                    newContentElement.textContent = response.data.content;
+                    textarea.replaceWith(newContentElement);
+                    saveButton.remove();
+                    cancelButton.remove();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('編集に失敗しました。');
+            });
+        });
+
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = 'キャンセル';
+        cancelButton.addEventListener('click', function() {
+            const newContentElement = document.createElement('div');
+            newContentElement.className = `${type}-content`;
+            newContentElement.textContent = currentContent;
+            textarea.replaceWith(newContentElement);
+            saveButton.remove();
+            cancelButton.remove();
+        });
+
+        element.appendChild(saveButton);
+        element.appendChild(cancelButton);
+    }
+
+    function handleDelete(button, type) {
+        if (confirm(`本当にこの${type === 'post' ? '投稿' : 'コメント'}を削除しますか？`)) {
+            const element = button.closest(type === 'post' ? '.post-container' : '.comment');
+            const id = type === 'post'
+                ? element.querySelector('.post').dataset.postId
+                : element.dataset.commentId;
+
+            axios.post(`/${type}/${id}/delete/`)
+            .then(response => {
+                if (response.data.success) {
+                    element.remove();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('削除に失敗しました。');
+            });
+        }
+    }
+
+    function handleLike(button) {
+        console.log('handleLike function called');
+        const itemType = button.dataset.type;
+        const itemId = button.dataset.id;
+        console.log('itemType:', itemType, 'itemId:', itemId);
+
+        axios.post(`/${itemType}/${itemId}/like/`)
+            .then(response => {
+                const data = response.data;
+                const likeCountSpan = button.querySelector('.like-count');
+                likeCountSpan.textContent = data.likes_count;
+                if (data.liked) {
+                    button.classList.add('liked');
+                } else {
+                    button.classList.remove('liked');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}アカウント有効化 - 社内ポータル{% endblock %}
+
+{% block content %}
+<h2>アカウントが有効化されました</h2>
+<p>おめでとうございます！あなたのアカウントが正常に有効化されました。</p>
+<p><a href="{% url 'portal:login' %}">こちら</a>からログインしてください。</p>
+{% endblock %}

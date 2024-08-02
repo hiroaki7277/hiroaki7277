@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}社内ポータル{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{% url 'portal:home' %}">ホーム</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'portal:profile' %}">プロフィール</a></li>
+                    <li><a href="{% url 'portal:chat_room' %}">チャット</a></li>
+                    <li><a href="#" id="logout-link">ログアウト</a></li>
+                {% else %}
+                    <li><a href="{% url 'portal:login' %}">ログイン</a></li>
+                    <li><a href="{% url 'portal:signup' %}">ユーザー登録</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    {% csrf_token %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var logoutLink = document.getElementById('logout-link');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var form = document.createElement('form');
+                    form.method = 'post';
+                    form.action = "{% url 'portal:logout' %}";
+                    var csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = 'csrfmiddlewaretoken';
+                    csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    form.appendChild(csrfInput);
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>
