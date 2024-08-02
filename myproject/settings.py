@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-0x@c8=m#4!h7&84y7jbr^5u-d-&$q=29)*_8l7m%u+jh%%ilcl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['dairin-sys.net', 'www.dairin-sys.net', 'localhost', '127.0.0.1']
 
 # Application definition
 
