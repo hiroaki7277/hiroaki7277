@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import environ
 
 # .envファイルから環境変数をロード
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
@@ -34,7 +35,7 @@ SECRET_KEY = 'django-insecure-0x@c8=m#4!h7&84y7jbr^5u-d-&$q=29)*_8l7m%u+jh%%ilcl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['dairin-sys.net', 'www.dairin-sys.net', 'localhost', '127.0.0.1']
 
 # Application definition
 
@@ -150,7 +151,7 @@ LOGIN_REDIRECT_URL = 'portal:home'
 PASSWORD_RESET_TIMEOUT = 3600  # 1 hour
 
 # 開発環境用メール設定
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 LOGOUT_REDIRECT_URL = 'portal:home'
 
@@ -165,3 +166,28 @@ CHANNEL_LAYERS = {
 }
 
 CSRF_COOKIE_HTTPONLY = False
+
+
+
+# settings.py のメール設定を確認する
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+# デバッグ用に環境変数の値を出力
+#print("EMAIL_USE_TLS:", EMAIL_USE_TLS)
+#print("EMAIL_USE_SSL:", EMAIL_USE_SSL)
+#print("EMAIL_HOST:", EMAIL_HOST)
+#print("EMAIL_PORT:", EMAIL_PORT)
+#print("EMAIL_HOST_USER:", EMAIL_HOST_USER)
+#print("EMAIL_HOST_PASSWORD:", EMAIL_HOST_PASSWORD)
+#print("DEFAULT_FROM_EMAIL:", DEFAULT_FROM_EMAIL)
+
+# EMAIL_USE_TLSとEMAIL_USE_SSLが同時にTrueにならないようにする
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive, so only set one of those settings to True.")
