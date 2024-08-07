@@ -1,0 +1,60 @@
+[33mcommit 5e1bda9c54fa146121a5dc6c6b675223e9abe98a[m[33m ([m[1;36mHEAD -> [m[1;32m20240730UP[m[33m, [m[1;31morigin/20240730UP[m[33m)[m
+Author: hiroaki7277 <hiroaki.s@dairin-itc.jp>
+Date:   Tue Aug 6 15:00:20 2024 +0900
+
+    Updated hiroaki7277 with latest changes
+
+[33mcommit faea0e804149eba415652ea1e29a265fabda8896[m
+Author: hiroaki7277 <hiroaki.s@dairin-itc.jp>
+Date:   Tue Aug 6 14:30:51 2024 +0900
+
+    Updated project with latest changes
+
+[33mcommit c599cfc689c0a8cc152ca3e11616ca6002fd708d[m
+Author: hiroaki_sugiuchi <hiroakisugiuchi@MacBook-Air.local>
+Date:   Fri Aug 2 12:49:37 2024 +0900
+
+    Update requirements.txt
+
+[33mcommit 013014a917943a8cc0514a47c198b30e77a9b00b[m
+Author: hiroaki_sugiuchi <hiroakisugiuchi@MacBook-Air.local>
+Date:   Tue Jul 30 12:07:07 2024 +0900
+
+    20240730 New version with recent changes
+
+[33mcommit 79e4e371880438dbb26556711568450a39db7311[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: hiroaki_sugiuchi <hiroakisugiuchi@MacBook-Air.local>
+Date:   Thu Jul 25 15:47:17 2024 +0900
+
+    202407251547 環境設定済み
+
+[33mcommit 8402862169f11906d9e9c88fbf0ad3961b4360e2[m
+Author: hiroaki7277 <hiroaki.s@dairin-itc.jp>
+Date:   Fri Jul 12 12:00:59 2024 +0900
+
+    Clean up unnecessary files and update settings
+
+[33mcommit 556ec85fa236302069ba68faa6c425e8f779850b[m
+Merge: 55e51f5 871cc21
+Author: hiroaki7277 <hiroaki.s@dairin-itc.jp>
+Date:   Fri Jul 12 11:57:57 2024 +0900
+
+    Merge branch 'master' of https://github.com/hiroaki7277/hiroaki7277
+
+[33mcommit 55e51f55ec9637eddf9003537d53891a5f9a6df7[m
+Author: hiroaki7277 <hiroaki.s@dairin-itc.jp>
+Date:   Fri Jul 12 11:55:26 2024 +0900
+
+    Add .gitignore file with necessary patterns
+
+[33mcommit 871cc212a74c5c5f972ee22056f26797dd811438[m
+Author: hiroaki7277 <hiroaki.s@dairin-itc.jp>
+Date:   Fri Jul 12 10:44:51 2024 +0900
+
+    Add requirements.txt
+
+[33mcommit b4376299c488c6aa96095677976d3dc440c7a501[m
+Author: hiroaki7277 <hiroaki.s@dairin-itc.jp>
+Date:   Fri Jul 12 10:36:25 2024 +0900
+
+    Initial commit

@@ -25,7 +25,9 @@ import logging
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
+
 def home(request):
+    logger.error('Rendering home.html template')
     return render(request, 'portal/home.html')
 
 
