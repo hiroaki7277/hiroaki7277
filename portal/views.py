@@ -21,6 +21,9 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Post, Comment, Like
 import logging
+from .models import Profile
+from .decorators import check_department_and_position
+
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -74,7 +77,7 @@ def logout_view(request):
 def profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=profile)
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             return redirect('portal:profile')

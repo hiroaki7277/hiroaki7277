@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Post, Comment, Profile
 from .models import Post, Comment
+from .models import Profile
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=254, required=True, help_text='必須。有効なメールアドレスを入力してください。')
@@ -29,7 +30,17 @@ class SignUpForm(UserCreationForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio', 'location', 'birth_date']
+        fields = ['bio', 'location', 'birth_date', 'gender', 'blood_type', 'department', 'position', 'profile_image']
+        labels = {
+            'bio': '自己紹介',
+            'location': '場所',
+            'birth_date': '生年月日',
+            'gender': '性別',
+            'blood_type': '血液型',
+            'department': '部署',
+            'position': '役職',
+            'profile_image': 'プロフィール画像',
+        }
 
 class PostForm(forms.ModelForm):
     content = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}))

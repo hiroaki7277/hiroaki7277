@@ -10,20 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 from dotenv import load_dotenv
-import logging
-
-
 
 # .envファイルから環境変数をロード
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+SESSION_COOKIE_SECURE = False  # 開発環境ではFalse、本番環境ではTrue
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -34,16 +34,8 @@ SECRET_KEY = 'django-insecure-0x@c8=m#4!h7&84y7jbr^5u-d-&$q=29)*_8l7m%u+jh%%ilcl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['dairin-sys.net', 'www.dairin-sys.net', 'localhost', '127.0.0.1', '162.43.85.85']
-
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://dairin-sys.net',
-    'https://www.dairin-sys.net',
-]
-CSRF_COOKIE_SECURE = True
-
-
+ALLOWED_HOSTS = ['dairin-sys.net', 'www.dairin-sys.net', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 # Application definition
 
@@ -70,12 +62,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'myproject.urls'
 
-# settings.py
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'hiroaki7277', 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # この行を追加または更新
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,31 +79,21 @@ TEMPLATES = [
 ]
 
 
-
-# ログ設定
-logger = logging.getLogger(__name__)
-logger.error(f'TEMPLATE DIRS: {TEMPLATES[0]["DIRS"]}')
-
-print(f"TEMPLATE DIRS: {TEMPLATES[0]['DIRS']}")
-
-
 WSGI_APPLICATION = 'myproject.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'mydatabase'),
-        'USER': os.getenv('DB_USER', 'myuser'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'newpassword'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'ENGINE': 'django.db.backends.sqlite3' if DEBUG else 'django.db.backends.postgresql',
+        'NAME': BASE_DIR / 'db.sqlite3' if DEBUG else os.getenv('DB_NAME'),
+        'USER': '' if DEBUG else os.getenv('DB_USER'),
+        'PASSWORD': '' if DEBUG else os.getenv('DB_PASSWORD'),
+        'HOST': '' if DEBUG else os.getenv('DB_HOST'),
+        'PORT': '' if DEBUG else os.getenv('DB_PORT'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -143,13 +123,7 @@ TIME_ZONE = 'Asia/Tokyo'
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
-
-LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'locale'),
-]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -157,48 +131,37 @@ LOCALE_PATHS = [
 
 # settings.py
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
-# 追加: STATIC_ROOTの設定
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # STATIC_ROOTをSTATICFILES_DIRSとは別のディレクトリに設定
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 LOGIN_URL = 'portal:login'
 LOGIN_REDIRECT_URL = 'portal:home'
+PASSWORD_RESET_TIMEOUT = 3600  # 1 hour
+
+# 開発環境用メール設定
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 LOGOUT_REDIRECT_URL = 'portal:home'
 
-PASSWORD_RESET_TIMEOUT = 3600
+
+ASGI_APPLICATION = 'myproject.asgi.application'
 
 
-# Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'c15p52tv.mwprem.net'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'hiroaki.s'
-EMAIL_HOST_PASSWORD = 'Sugiuchi772@#'
-DEFAULT_FROM_EMAIL = 'hiroaki.s@c15p52tv.mwprem.net'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
-# EMAIL_USE_TLS と EMAIL_USE_SSL が同時に True でないことを確認する
-if EMAIL_USE_TLS and EMAIL_USE_SSL:
-    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive, so only set one of those settings to True.")
-
-print("EMAIL_USE_TLS:", EMAIL_USE_TLS)
-print("EMAIL_USE_SSL:", EMAIL_USE_SSL)
-print("EMAIL_HOST:", EMAIL_HOST)
-print("EMAIL_PORT:", EMAIL_PORT)
-print("EMAIL_HOST_USER:", EMAIL_HOST_USER)
-print("EMAIL_HOST_PASSWORD:", EMAIL_HOST_PASSWORD)
+CSRF_COOKIE_HTTPONLY = False
